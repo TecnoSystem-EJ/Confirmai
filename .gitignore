@@ -10,3 +10,5 @@ logs/*.log
 Thumbs.db
 .vscode/
 .idea/
+
+/generated/prisma
