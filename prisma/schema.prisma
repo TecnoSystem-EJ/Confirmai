@@ -1,0 +1,73 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+// Definição dos enums
+
+enum EventoStatus {
+  ativo
+  encerrado
+  rascunho
+}
+
+enum CargoUsuario {
+  membro
+  admin
+}
+
+enum InscricaoStatus {
+  pendente
+  confirmada
+  cancelada
+}
+
+// Definição dos modelos
+
+model eventos {
+  id              String       @id @default(uuid())
+  titulo          String
+  descricao       String?      @db.Text
+  linkSlug        String       @unique @map("link_slug")
+  closingDate     DateTime     @map("closing_date")
+  limiteVagas     Int?         @map("limite_vagas")
+  numeroInscritos Int          @default(0) @map("numero_inscritos")
+  status          EventoStatus @default(rascunho)
+  createdAt       DateTime     @default(now()) @map("created_at")
+  updatedAt       DateTime     @updatedAt @map("updated_at")
+  inscricoes      inscricoes[]
+}
+
+model usuarios {
+  id        String       @id @default(uuid())
+  nome      String
+  email     String       @unique
+  senhaHash String       @map("senha_hash")
+  cargo     CargoUsuario @default(membro)
+  createdAt DateTime     @default(now()) @map("created_at")
+  updatedAt DateTime     @updatedAt @map("updated_at")
+}
+
+model inscricoes {
+  id        String          @id @default(uuid())
+  eventoId  String          @map("evento_id")
+  nome      String
+  email     String
+  curso     String?
+  status    InscricaoStatus @default(pendente)
+  createdAt DateTime        @default(now()) @map("created_at")
+  updatedAt DateTime        @updatedAt @map("updated_at")
+
+  // Relacionamento com a tabela de Eventos
+  evento eventos @relation(fields: [eventoId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+}
