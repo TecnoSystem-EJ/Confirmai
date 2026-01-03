@@ -24,6 +24,7 @@ enum EventoStatus {
 enum CargoUsuario {
   membro
   admin
+  global_admin
 }
 
 enum InscricaoStatus {

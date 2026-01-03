@@ -17,13 +17,19 @@ const loginUsuario: RequestHandler<
 > = async (req, res) => {
   const { email, senha } = req.body;
 
-  const usuario = await prisma.usuarios.findFirst({ where: { email } });
+  const usuario = await prisma.usuarios.findFirst({
+    where: { email },
+  });
 
   if (!usuario) throw new NaoAutorizadoException("email/senha incorreta");
 
   const senhaValida = await bcryptjs.compare(senha, usuario.senhaHash);
 
   if (!senhaValida) throw new NaoAutorizadoException("email/senha incorreta");
+
+  if (usuario.tenantId && usuario.tenantId !== req.tenant?.id) {
+    throw new NaoAutorizadoException("email/senha incorreta");
+  }
 
   const { senhaHash, ...usuarioSemSenha } = usuario;
 

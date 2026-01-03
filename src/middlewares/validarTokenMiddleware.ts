@@ -1,13 +1,16 @@
 import { RequestHandler } from "express";
 import jwt from "jsonwebtoken";
 import { JWT_SECRET } from "../config/constants";
-import { NaoAutorizadoException } from "../exceptions";
+import { AppException, NaoAutorizadoException } from "../exceptions";
 
 type JwtPayload = {
   id: string;
   nome: string;
   email: string;
-  cargo: "admin" | "membro";
+  cargo: "admin" | "membro" | "global_admin";
+  tenant?: {
+    id: string;
+  };
 };
 
 const validarTokenMiddleware: RequestHandler<any, any, any, any> = async (
@@ -35,6 +38,20 @@ const validarTokenMiddleware: RequestHandler<any, any, any, any> = async (
 
   if (!decoded) {
     throw new NaoAutorizadoException("Token inválido");
+  }
+
+  if (decoded.cargo !== "global_admin") {
+    if (!decoded.tenant || !decoded.tenant.id) {
+      throw new NaoAutorizadoException("Token mal formatado");
+    }
+
+    if (decoded.tenant.id !== req.tenant!.id) {
+      throw new AppException(
+        "Token de acesso não corresponde a empresa",
+        403,
+        "Forbidden"
+      );
+    }
   }
 
   req.user = decoded;
