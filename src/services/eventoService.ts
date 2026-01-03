@@ -14,10 +14,14 @@ export const generateSlug = (title: string): string => {
     .trim()}-${crypto.randomBytes(4).toString("hex")}`;
 };
 
-export const verificarEventoExistente = async (id: string) => {
+export const verificarEventoExistente = async (
+  id: string,
+  tenantId: string
+) => {
   const evento = await prisma.eventos.findUnique({
     where: {
       id,
+      tenantId,
     },
   });
 

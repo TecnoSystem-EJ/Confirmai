@@ -33,6 +33,9 @@ const loginUsuario: RequestHandler<
       nome: usuario.nome,
       email: usuario.email,
       cargo: usuario.cargo,
+      tenant: {
+        id: req.tenant!.id,
+      },
     },
     JWT_SECRET,
     { expiresIn: "1d" }

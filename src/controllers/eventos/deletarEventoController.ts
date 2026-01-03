@@ -14,23 +14,15 @@ const deletarEvento: RequestHandler<
 > = async (req, res) => {
   const { id } = req.params;
 
-  await verificarEventoExistente(id);
+  await verificarEventoExistente(id, req.tenant!.id);
 
   await prisma.eventos.update({
     where: {
       id,
+      tenantId: req.tenant!.id,
     },
     data: {
       status: "encerrado",
-    },
-  });
-
-  await prisma.inscricoes.updateMany({
-    where: {
-      eventoId: id,
-    },
-    data: {
-      status: "cancelada",
     },
   });
 

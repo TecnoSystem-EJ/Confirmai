@@ -18,6 +18,7 @@ const criarEvento: RequestHandler<
     data: {
       titulo,
       descricao,
+      tenantId: req.tenant!.id,
       closingDate: new Date(closingDate),
       limiteVagas: limiteVagas || null,
       linkSlug: generateSlug(titulo),

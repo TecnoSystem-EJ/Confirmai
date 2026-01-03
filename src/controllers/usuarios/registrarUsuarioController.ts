@@ -18,6 +18,7 @@ const registrarUsuario: RequestHandler<
   const usuarioExistente = await prisma.usuarios.findFirst({
     where: {
       email: email,
+      tenantId: req.tenant!.id,
     },
   });
 
@@ -35,6 +36,7 @@ const registrarUsuario: RequestHandler<
     data: {
       nome,
       email,
+      tenantId: req.tenant!.id,
       senhaHash,
       cargo,
     },

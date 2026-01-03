@@ -21,12 +21,13 @@ const criarInscricao: RequestHandler<
   const { nome, email, curso } = req.body;
 
   //verifica se o evento existe
-  const evento = await verificarEventoExistente(evento_id);
+  const evento = await verificarEventoExistente(evento_id, req.tenant!.id);
   verificarEventoEncerradoOuSemVagas(evento);
 
   const usuarioInscrito = await prisma.inscricoes.findFirst({
     where: {
       eventoId: evento_id,
+      tenantId: req.tenant!.id,
       email,
     },
   });
@@ -43,6 +44,7 @@ const criarInscricao: RequestHandler<
   const novaInscricao = await prisma.inscricoes.create({
     data: {
       eventoId: evento_id,
+      tenantId: req.tenant!.id,
       nome,
       email,
       curso,
@@ -55,6 +57,7 @@ const criarInscricao: RequestHandler<
   await prisma.eventos.update({
     where: {
       id: evento_id,
+      tenantId: req.tenant!.id,
     },
     data: {
       numeroInscritos: {
