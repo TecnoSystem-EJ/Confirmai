@@ -1,7 +1,7 @@
 import crypto from "crypto";
 import { eventosModel } from "../../generated/prisma/models";
 import { prisma } from "../config/database";
-import { AppException, NaoEncontradoException } from "../exceptions";
+import { ConflitoException, NaoEncontradoException } from "../exceptions";
 
 export const generateSlug = (title: string): string => {
   return `${title
@@ -37,10 +37,8 @@ export const verificarEventoEncerradoOuSemVagas = (evento: eventosModel) => {
     new Date() > evento.closingDate ||
     (evento.limiteVagas && evento.numeroInscritos >= evento.limiteVagas)
   ) {
-    throw new AppException(
-      "Evento com inscrições encerradas ou sem vagas",
-      409,
-      "Conflito"
+    throw new ConflitoException(
+      "Evento com inscrições encerradas ou sem vagas"
     );
   }
 };

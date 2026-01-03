@@ -1,6 +1,6 @@
 import { RequestHandler } from "express";
 import { prisma } from "../../config/database";
-import { AppException } from "../../exceptions";
+import { ConflitoException } from "../../exceptions";
 import {
   CriarInscricaoParamsSchema,
   CriarInscricaoRequestSchema,
@@ -33,11 +33,7 @@ const criarInscricao: RequestHandler<
   });
 
   if (usuarioInscrito) {
-    throw new AppException(
-      "Usuário já inscrito no evento",
-      409,
-      "Inscrição existente"
-    );
+    throw new ConflitoException("Usuário já inscrito no evento");
   }
 
   // Criar a inscrição no banco de dados

@@ -1,7 +1,7 @@
 import { RequestHandler } from "express";
 import jwt from "jsonwebtoken";
 import { JWT_SECRET } from "../config/constants";
-import { AppException, NaoAutorizadoException } from "../exceptions";
+import { NaoAutorizadoException, ProibidoException } from "../exceptions";
 
 type JwtPayload = {
   id: string;
@@ -46,11 +46,7 @@ const validarTokenMiddleware: RequestHandler<any, any, any, any> = async (
     }
 
     if (decoded.tenant.id !== req.tenant!.id) {
-      throw new AppException(
-        "Token de acesso não corresponde a empresa",
-        403,
-        "Forbidden"
-      );
+      throw new ProibidoException("Token de acesso não corresponde a empresa");
     }
   }
 

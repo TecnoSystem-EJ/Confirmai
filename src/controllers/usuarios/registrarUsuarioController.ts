@@ -1,7 +1,7 @@
 import bcryptjs from "bcryptjs";
 import { RequestHandler } from "express";
 import { prisma } from "../../config/database";
-import { AppException } from "../../exceptions";
+import { ConflitoException } from "../../exceptions";
 import {
   RegistrarUsuarioRequestSchema,
   RegistrarUsuarioResponseSchema,
@@ -23,11 +23,7 @@ const registrarUsuario: RequestHandler<
   });
 
   if (usuarioExistente) {
-    throw new AppException(
-      "Usuário já cadastrado com esse email",
-      409,
-      "Usuário cadastrado"
-    );
+    throw new ConflitoException("Usuário já cadastrado com esse email");
   }
 
   const senhaHash = await bcryptjs.hash(senha, 10);

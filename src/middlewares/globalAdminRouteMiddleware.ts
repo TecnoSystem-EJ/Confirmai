@@ -1,5 +1,5 @@
 import { RequestHandler } from "express";
-import { AppException, NaoAutorizadoException } from "../exceptions";
+import { NaoAutorizadoException, ProibidoException } from "../exceptions";
 
 const globalAdminRouteMiddleware: RequestHandler<
   unknown,
@@ -14,11 +14,7 @@ const globalAdminRouteMiddleware: RequestHandler<
   const cargo = req.user.cargo;
 
   if (cargo !== "global_admin") {
-    throw new AppException(
-      "Rota exclusiva para admin global",
-      403,
-      "Forbidden"
-    );
+    throw new ProibidoException("Rota exclusiva para admin global");
   }
 
   next();
