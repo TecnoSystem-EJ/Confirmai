@@ -1,5 +1,4 @@
 import { RequestHandler } from "express";
-import { NaoAutorizadoException } from "../exceptions";
 import { verificarTenantExistente } from "../services/tenantService";
 
 const identificarTenantMiddleware: RequestHandler<any, any, any, any> = async (
@@ -11,10 +10,9 @@ const identificarTenantMiddleware: RequestHandler<any, any, any, any> = async (
 
   const subdomain = host.split(".")[0]; // empresa de empresa.seuapp.com
 
-  if (!subdomain || subdomain === "www" || subdomain === "api") {
-    throw new NaoAutorizadoException(
-      "Subdomínio não especificado ou incorreto"
-    );
+  if (!subdomain || ["www", "api", "localhost"].includes(subdomain)) {
+    next();
+    return;
   }
 
   const tenant = await verificarTenantExistente(subdomain);

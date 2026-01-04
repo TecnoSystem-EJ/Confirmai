@@ -1,6 +1,7 @@
 import { Router } from "express";
 import {
   buscarUsuario,
+  buscarUsuarios,
   loginUsuario,
   registrarUsuario,
 } from "../controllers/usuarios";
@@ -8,6 +9,7 @@ import {
   validarSchemaMiddleware,
   validarTokenMiddleware,
 } from "../middlewares";
+import globalAdminRouteMiddleware from "../middlewares/globalAdminRouteMiddleware";
 import loginUsuarioSchema from "../schemas/usuarios/loginUsuarioSchema";
 import registrarUsuarioSchema from "../schemas/usuarios/registrarUsuarioSchema";
 
@@ -26,5 +28,12 @@ usuariosRoutes.post(
 );
 
 usuariosRoutes.get("/me", validarTokenMiddleware, buscarUsuario);
+
+usuariosRoutes.get(
+  "/all",
+  validarTokenMiddleware,
+  globalAdminRouteMiddleware,
+  buscarUsuarios
+);
 
 export default usuariosRoutes;
