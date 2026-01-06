@@ -1,7 +1,11 @@
 import crypto from "crypto";
 import { eventosModel } from "../../generated/prisma/models";
 import { prisma } from "../config/database";
-import { ConflitoException, NaoEncontradoException } from "../exceptions";
+import {
+  ConflitoException,
+  NaoAutorizadoException,
+  NaoEncontradoException,
+} from "../exceptions";
 
 export const generateSlug = (title: string): string => {
   return `${title
@@ -27,6 +31,10 @@ export const verificarEventoExistente = async (
 
   if (!evento) {
     throw new NaoEncontradoException("Evento não encontrado");
+  }
+
+  if (evento.status !== "ativo") {
+    throw new NaoAutorizadoException("Evento não ativo");
   }
 
   return evento;

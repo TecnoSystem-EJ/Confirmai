@@ -48,6 +48,8 @@ const validarTokenMiddleware: RequestHandler<any, any, any, any> = async (
     if (decoded.tenant.id !== req.tenant!.id) {
       throw new ProibidoException("Token de acesso não corresponde a empresa");
     }
+  } else {
+    decoded.tenant!.id = req.tenant!.id;
   }
 
   req.user = decoded;

@@ -1,11 +1,11 @@
 import { ErrorRequestHandler } from "express";
 import z from "zod";
 import { AppException } from "../exceptions";
-import { LidarErroSchema } from "../schemas/error/lidarErroSchema";
+import { ErroSchema } from "../schemas/error/erroSchema";
 
 const lidarErroMiddleware: ErrorRequestHandler<
   unknown,
-  LidarErroSchema,
+  ErroSchema,
   unknown,
   unknown
 > = async (error, req, res, _next) => {

@@ -10,11 +10,6 @@ const identificarTenantMiddleware: RequestHandler<any, any, any, any> = async (
 
   const subdomain = host.split(".")[0]; // empresa de empresa.seuapp.com
 
-  if (!subdomain || ["www", "api", "localhost"].includes(subdomain)) {
-    next();
-    return;
-  }
-
   const tenant = await verificarTenantExistente(subdomain);
 
   req.tenant = {
