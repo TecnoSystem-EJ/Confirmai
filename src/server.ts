@@ -1,4 +1,3 @@
-import "express-async-errors";
 import app from "./app";
 import { PORT } from "./config/constants";
 import seed from "./config/seed";

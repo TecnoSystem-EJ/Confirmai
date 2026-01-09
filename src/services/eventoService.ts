@@ -40,11 +40,22 @@ export const verificarEventoExistente = async (
   return evento;
 };
 
-export const verificarEventoEncerradoOuSemVagas = (evento: eventosModel) => {
+export const verificarEventoEncerradoOuSemVagas = async (
+  evento: eventosModel
+) => {
   if (
     new Date() > evento.closingDate ||
     (evento.limiteVagas && evento.numeroInscritos >= evento.limiteVagas)
   ) {
+    if (new Date() > evento.closingDate && evento.status === "ativo") {
+      await prisma.eventos.update({
+        where: { id: evento.id },
+        data: {
+          status: "encerrado",
+        },
+      });
+    }
+
     throw new ConflitoException(
       "Evento com inscrições encerradas ou sem vagas"
     );

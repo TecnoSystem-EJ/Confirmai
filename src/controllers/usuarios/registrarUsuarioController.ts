@@ -42,7 +42,7 @@ const registrarUsuario: RequestHandler<
   });
 
   return res.status(201).json({
-    mensagem: "Usuario cadastrado com sucesso!",
+    mensagem: "Usuário cadastrado com sucesso!",
     usuario: novoUsuario,
   });
 };

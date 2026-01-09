@@ -2,6 +2,7 @@ import { RequestHandler } from "express";
 import jwt from "jsonwebtoken";
 import { JWT_SECRET } from "../config/constants";
 import { NaoAutorizadoException, ProibidoException } from "../exceptions";
+import { verificarUsuarioExistente } from "../services/usuariosService";
 
 type JwtPayload = {
   id: string;
@@ -39,6 +40,9 @@ const validarTokenMiddleware: RequestHandler<any, any, any, any> = async (
   if (!decoded) {
     throw new NaoAutorizadoException("Token inválido");
   }
+
+  //Verifica se o usuário do token existe
+  await verificarUsuarioExistente(decoded.id);
 
   if (decoded.cargo !== "global_admin") {
     if (!decoded.tenant || !decoded.tenant.id) {
