@@ -17,10 +17,10 @@ const exportarInscricoesParaCSV: RequestHandler<
   const { id: evento_id } = req.params; // pegar id da url de evento
 
   //verifica se o evento existe
-  await verificarEventoExistente(evento_id);
+  await verificarEventoExistente(evento_id, req.tenant!.id);
 
   const inscricoes = await prisma.inscricoes.findMany({
-    where: { eventoId: evento_id },
+    where: { eventoId: evento_id, tenantId: req.tenant!.id },
   });
 
   if (inscricoes.length === 0) {

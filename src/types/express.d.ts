@@ -1,5 +1,3 @@
-type CargoUsuario = "admin" | "membro";
-
 declare global {
   namespace Express {
     interface Request {
@@ -7,7 +5,16 @@ declare global {
         id: string;
         nome: string;
         email: string;
-        cargo: CargoUsuario;
+        cargo: "admin" | "membro" | "global_admin";
+        tenant?: {
+          id: string;
+        };
+      };
+      tenant?: {
+        id: string;
+        nome: string;
+        slug: string;
+        status: "ativo" | "cancelado" | "suspenso";
       };
     }
   }

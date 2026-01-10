@@ -1,20 +1,11 @@
 import { RequestHandler } from "express";
-import { LidarErroSchema } from "../schemas/error/lidarErroSchema";
+import { NaoEncontradoException } from "../exceptions";
 
-const naoEncontradoMiddleware: RequestHandler<
-  any,
-  LidarErroSchema,
-  any,
-  any
-> = async (req, res) => {
-  res.status(404).json({
-    erro: "Não encontrado",
-    mensagem: "A rota requisitada não foi encontrada",
-    metodo: req.method,
-    status: 404,
-    path: req.path,
-    data: new Date().toLocaleString(),
-  });
+const naoEncontradoMiddleware: RequestHandler<any, any, any, any> = async (
+  _req,
+  _res
+) => {
+  throw new NaoEncontradoException("A rota requisitada não foi encontrada");
 };
 
 export default naoEncontradoMiddleware;

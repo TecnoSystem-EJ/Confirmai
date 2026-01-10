@@ -16,11 +16,12 @@ const editarEvento: RequestHandler<
   const { id } = req.params;
   const { titulo, descricao, closingDate, limiteVagas } = req.body;
 
-  await verificarEventoExistente(id);
+  await verificarEventoExistente(id, req.tenant!.id);
 
   const eventoAtualizado = await prisma.eventos.update({
     where: {
       id,
+      tenantId: req.tenant!.id,
     },
     data: {
       titulo,

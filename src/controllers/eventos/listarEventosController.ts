@@ -7,10 +7,11 @@ const listarEventos: RequestHandler<
   ListarEventosResponseSchema,
   any,
   any
-> = async (_req, res) => {
+> = async (req, res) => {
   const eventos = await prisma.eventos.findMany({
     where: {
       status: "ativo",
+      tenantId: req.tenant!.id,
     },
   });
   return res.status(200).json(eventos);

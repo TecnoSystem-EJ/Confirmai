@@ -1,5 +1,5 @@
 import { RequestHandler } from "express";
-import { AppException, NaoAutorizadoException } from "../exceptions";
+import { NaoAutorizadoException, ProibidoException } from "../exceptions";
 
 const adminRouteMiddleware: RequestHandler<
   unknown,
@@ -13,8 +13,8 @@ const adminRouteMiddleware: RequestHandler<
 
   const cargo = req.user.cargo;
 
-  if (cargo !== "admin") {
-    throw new AppException("Rota exclusiva para admin", 403, "Forbidden");
+  if (cargo === "membro") {
+    throw new ProibidoException("Rota exclusiva para admin");
   }
 
   next();

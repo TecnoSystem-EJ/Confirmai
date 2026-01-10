@@ -24,6 +24,7 @@ enum EventoStatus {
 enum CargoUsuario {
   membro
   admin
+  global_admin
 }
 
 enum InscricaoStatus {
@@ -32,10 +33,38 @@ enum InscricaoStatus {
   cancelada
 }
 
+enum TenantStatus {
+  ativo
+  cancelado
+  suspenso
+}
+
 // Definição dos modelos
+
+model tenants {
+  id         String       @id @default(uuid())
+  nome       String
+  cnpj       String       @unique @db.VarChar(14)
+  telefone   String       @db.VarChar(20)
+  email      String       @unique
+  site       String?
+  slug       String       @unique // para subdomínio: empresa.seuapp.com
+  status     TenantStatus @default(ativo) // ativo, suspenso, cancelado
+  createdAt  DateTime     @default(now()) @map("created_at")
+  updated_at DateTime     @updatedAt @map("updated_at")
+
+  // Configurações
+  logoUrl String? @map("logo_url")
+
+  // Relacionamentos
+  usuarios   usuarios[]
+  eventos    eventos[]
+  inscricoes inscricoes[]
+}
 
 model eventos {
   id              String       @id @default(uuid())
+  tenantId        String       @map("tenant_id")
   titulo          String
   descricao       String?      @db.Text
   linkSlug        String       @unique @map("link_slug")
@@ -46,20 +75,30 @@ model eventos {
   createdAt       DateTime     @default(now()) @map("created_at")
   updatedAt       DateTime     @updatedAt @map("updated_at")
   inscricoes      inscricoes[]
+
+  tenant tenants @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, linkSlug])
 }
 
 model usuarios {
   id        String       @id @default(uuid())
+  tenantId  String?      @map("tenant_id")
   nome      String
-  email     String       @unique
+  email     String
   senhaHash String       @map("senha_hash")
   cargo     CargoUsuario @default(membro)
   createdAt DateTime     @default(now()) @map("created_at")
   updatedAt DateTime     @updatedAt @map("updated_at")
+
+  tenant tenants? @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, email])
 }
 
 model inscricoes {
   id        String          @id @default(uuid())
+  tenantId  String          @map("tenant_id")
   eventoId  String          @map("evento_id")
   nome      String
   email     String
@@ -70,4 +109,8 @@ model inscricoes {
 
   // Relacionamento com a tabela de Eventos
   evento eventos @relation(fields: [eventoId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  tenant tenants @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, eventoId, email])
 }
