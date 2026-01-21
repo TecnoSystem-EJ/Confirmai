@@ -19,23 +19,37 @@ const registrarUsuarioSchema = z.object({
                 palavra.charAt(0).toUpperCase() + palavra.substring(1)
             )
             .join(" ")
-        ),
+        )
+        .openapi({ description: "Usuário teste", example: "Usuário teste" }),
       email: z
         .email("O campo 'email' deve ser um email válido")
         .nonoptional("O campo 'email' é obrigatório")
-        .transform((email) => email.trim().toLowerCase()),
+        .transform((email) => email.trim().toLowerCase())
+        .openapi({
+          description: "E-mail do usuário",
+          example: "hello@example.com",
+        }),
       senha: z
         .string("O campo 'senha' deve ser uma string")
         .min(6, "O campo 'senha' deve ter no mínimo 6 caracteres")
         .max(20, "O campo 'senha' deve ter no máximo 20 caracteres")
-        .nonoptional("O campo 'senha' é obrigatório"),
+        .nonoptional("O campo 'senha' é obrigatório")
+        .openapi({
+          description: "Senha do usuário",
+          example: "senha123",
+        }),
       cargo: cargoUsuarioEnumSchema,
     })
     .strict(),
 
   response: z
     .object({
-      mensagem: z.string(),
+      mensagem: z
+        .string()
+        .openapi({
+          description: "Mensagem de sucesso da criação",
+          example: "Usuario cadastrado com sucesso!",
+        }),
       usuario: usuarioSchema,
     })
     .strict(),

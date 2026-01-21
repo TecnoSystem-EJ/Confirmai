@@ -5,7 +5,10 @@ const deletarEventoSchema = z.object({
   params: paramUUIDSchema,
   response: z
     .object({
-      mensagem: z.string(),
+      mensagem: z.string().openapi({
+        description: "Mensagem de confirmação da exclusão",
+        example: "Evento deletado com sucesso",
+      }),
     })
     .strict(),
 });

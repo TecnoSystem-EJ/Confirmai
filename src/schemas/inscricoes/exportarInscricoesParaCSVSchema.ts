@@ -3,7 +3,9 @@ import paramUUIDSchema from "../paramUUIDSchema";
 
 const exportarInscricoesParaCSVSchema = z.object({
   params: paramUUIDSchema,
-  response: z.string(),
+  response: z
+    .string()
+    .openapi({ description: "Arquivo CSV com as inscrições do evento" }),
 });
 
 export type ExportarInscricoesParaCSVParamsSchema = z.infer<

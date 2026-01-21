@@ -1,18 +1,16 @@
 import { ErrorRequestHandler } from "express";
 import z from "zod";
-import {
-  AppException,
-  NaoAutorizadoException,
-  NaoEncontradoException,
-} from "../exceptions";
-import { LidarErroSchema } from "../schemas/error/lidarErroSchema";
+import { AppException } from "../exceptions";
+import { ErroSchema } from "../schemas/error/erroSchema";
 
 const lidarErroMiddleware: ErrorRequestHandler<
   unknown,
-  LidarErroSchema,
+  ErroSchema,
   unknown,
   unknown
 > = async (error, req, res, _next) => {
+  console.warn(error);
+
   const metodo = req.method;
   const path = req.path;
   const data = new Date().toLocaleString();
@@ -23,26 +21,6 @@ const lidarErroMiddleware: ErrorRequestHandler<
       mensagem: error.issues.map((e) => `${e.code}: ${e.message}`),
       metodo,
       status: 422,
-      path,
-      data,
-    });
-    return;
-  } else if (error instanceof NaoEncontradoException) {
-    res.status(error.status).json({
-      erro: error.erro,
-      mensagem: error.mensagem,
-      metodo,
-      status: error.status,
-      path,
-      data,
-    });
-    return;
-  } else if (error instanceof NaoAutorizadoException) {
-    res.status(error.status).json({
-      erro: error.erro,
-      mensagem: error.mensagem,
-      metodo,
-      status: error.status,
       path,
       data,
     });

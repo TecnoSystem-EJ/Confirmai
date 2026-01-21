@@ -13,7 +13,7 @@ const detalhesEvento: RequestHandler<
 > = async (req, res) => {
   const { id } = req.params;
 
-  const evento = await verificarEventoExistente(id);
+  const evento = await verificarEventoExistente(id, req.tenant!.id);
 
   return res.status(200).json(evento);
 };

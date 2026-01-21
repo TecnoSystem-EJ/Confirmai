@@ -1,7 +1,7 @@
 import bcryptjs from "bcryptjs";
 import { RequestHandler } from "express";
 import { prisma } from "../../config/database";
-import { AppException } from "../../exceptions";
+import { ConflitoException } from "../../exceptions";
 import {
   RegistrarUsuarioRequestSchema,
   RegistrarUsuarioResponseSchema,
@@ -18,15 +18,12 @@ const registrarUsuario: RequestHandler<
   const usuarioExistente = await prisma.usuarios.findFirst({
     where: {
       email: email,
+      tenantId: req.tenant!.id,
     },
   });
 
   if (usuarioExistente) {
-    throw new AppException(
-      "Usuário já cadastrado com esse email",
-      409,
-      "Usuário cadastrado"
-    );
+    throw new ConflitoException("Usuário já cadastrado com esse email");
   }
 
   const senhaHash = await bcryptjs.hash(senha, 10);
@@ -35,6 +32,7 @@ const registrarUsuario: RequestHandler<
     data: {
       nome,
       email,
+      tenantId: req.tenant!.id,
       senhaHash,
       cargo,
     },
@@ -44,7 +42,7 @@ const registrarUsuario: RequestHandler<
   });
 
   return res.status(201).json({
-    mensagem: "Usuario cadastrado com sucesso!",
+    mensagem: "Usuário cadastrado com sucesso!",
     usuario: novoUsuario,
   });
 };

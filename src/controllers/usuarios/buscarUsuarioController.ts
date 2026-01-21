@@ -11,7 +11,7 @@ const buscarUsuario: RequestHandler<
 > = async (req, res) => {
   const usuario = await prisma.usuarios.findUnique({
     where: {
-      id: req.user?.id,
+      id: req.user!.id,
     },
     omit: {
       senhaHash: true,

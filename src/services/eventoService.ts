@@ -1,7 +1,11 @@
 import crypto from "crypto";
 import { eventosModel } from "../../generated/prisma/models";
 import { prisma } from "../config/database";
-import { AppException, NaoEncontradoException } from "../exceptions";
+import {
+  ConflitoException,
+  NaoAutorizadoException,
+  NaoEncontradoException,
+} from "../exceptions";
 
 export const generateSlug = (title: string): string => {
   return `${title
@@ -14,10 +18,14 @@ export const generateSlug = (title: string): string => {
     .trim()}-${crypto.randomBytes(4).toString("hex")}`;
 };
 
-export const verificarEventoExistente = async (id: string) => {
+export const verificarEventoExistente = async (
+  id: string,
+  tenantId: string
+) => {
   const evento = await prisma.eventos.findUnique({
     where: {
       id,
+      tenantId,
     },
   });
 
@@ -25,18 +33,31 @@ export const verificarEventoExistente = async (id: string) => {
     throw new NaoEncontradoException("Evento não encontrado");
   }
 
+  if (evento.status !== "ativo") {
+    throw new NaoAutorizadoException("Evento não ativo");
+  }
+
   return evento;
 };
 
-export const verificarEventoEncerradoOuSemVagas = (evento: eventosModel) => {
+export const verificarEventoEncerradoOuSemVagas = async (
+  evento: eventosModel
+) => {
   if (
     new Date() > evento.closingDate ||
     (evento.limiteVagas && evento.numeroInscritos >= evento.limiteVagas)
   ) {
-    throw new AppException(
-      "Evento com inscrições encerradas ou sem vagas",
-      409,
-      "Conflito"
+    if (new Date() > evento.closingDate && evento.status === "ativo") {
+      await prisma.eventos.update({
+        where: { id: evento.id },
+        data: {
+          status: "encerrado",
+        },
+      });
+    }
+
+    throw new ConflitoException(
+      "Evento com inscrições encerradas ou sem vagas"
     );
   }
 };
