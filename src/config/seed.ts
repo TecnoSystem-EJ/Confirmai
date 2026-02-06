@@ -29,4 +29,17 @@ const seed = async () => {
   }
 };
 
+if (process.argv[1] === import.meta.filename) {
+  seed()
+    .then(async () => {
+      await prisma.$disconnect();
+    })
+    .catch(async (e) => {
+      console.error(e);
+      await prisma.$disconnect();
+      process.exit(1);
+    });
+}
+
+
 export default seed;

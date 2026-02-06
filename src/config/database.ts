@@ -5,10 +5,12 @@ import {
   DATABASE_NAME,
   DATABASE_PASSWORD,
   DATABASE_USER,
+  DATABASE_PORT,
 } from "./constants";
 
 const adapter = new PrismaMariaDb({
   host: DATABASE_HOST,
+  port: Number(DATABASE_PORT),
   user: DATABASE_USER,
   password: DATABASE_PASSWORD,
   database: DATABASE_NAME,
