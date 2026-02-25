@@ -16,5 +16,8 @@
   },
   "devDependencies": {
     "turbo": "latest"
+  },
+  "dependencies": {
+    "pnpm": "^10.30.2"
   }
 }

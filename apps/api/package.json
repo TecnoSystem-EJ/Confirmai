@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "postinstall": "prisma generate",
-    "start": "npm run build && NODE_ENV=production node dist/server.js",
-    "dev": "NODE_ENV=development tsx watch src/server.ts",
+    "start": "npm run build && cross-env NODE_ENV=production node dist/server.js",
+    "dev": "cross-env NODE_ENV=development tsx watch src/server.ts",
     "build": "tsup src/server.ts",
     "test:create-db": "dotenv -e .env.test -- npx prisma db push",
     "test": "cross-env NODE_ENV=test NODE_OPTIONS=--experimental-vm-modules dotenv -e .env.test -- jest --runInBand",
