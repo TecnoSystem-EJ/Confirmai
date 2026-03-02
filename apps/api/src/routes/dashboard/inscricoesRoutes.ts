@@ -5,11 +5,24 @@ import { validarTokenMiddleware } from "../../middlewares";
 
 import { dashboardInscricoesController } from "../../controllers/dashboard/get_all_inscricoesController";
 
-const dashinscricoes_all_eventos = Router();
+import { dashboardInscricoesPorEventoController } from "../../controllers/dashboard/get_by_id_inscricoesController";
 
-dashinscricoes_all_eventos.get(
+import { verificarEventoDoTenant } from "../../middlewares/verificarEventoTenantMiddleware.ts";
+
+const dashinscricoes = Router();
+
+dashinscricoes.get(
   "/dashboard/inscricoes",
   validarTokenMiddleware,
   dashboardInscricoesController,
+  validarResponseMiddleware(dashboardInscricoesSchema)
+);
+
+
+dashinscricoes.get(
+  "/dashboard/eventos/:eventoId/inscricoes",
+  validarTokenMiddleware,
+  verificarEventoDoTenant,
+  dashboardInscricoesPorEventoController,
   validarResponseMiddleware(dashboardInscricoesSchema)
 );
