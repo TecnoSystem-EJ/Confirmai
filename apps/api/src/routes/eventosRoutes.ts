@@ -4,7 +4,8 @@ import {
   deletarEvento,
   detalhesEvento,
   editarEvento,
-  listarEventos,
+  //listarEventos,
+  BuscarEventos
 } from "../controllers/eventos";
 import {
   validarSchemaMiddleware,
@@ -14,6 +15,7 @@ import criarEventoSchema from "../schemas/eventos/criarEventoSchema";
 import deletarEventoSchema from "../schemas/eventos/deletarEventoSchema";
 import detalhesEventoSchema from "../schemas/eventos/detalhesEventoSchema";
 import editarEventoSchema from "../schemas/eventos/editarEventoSchema";
+import buscarEventosSchema from "../schemas/eventos/BuscarEventoSchema";
 
 const eventosRoutes = Router({ mergeParams: true });
 
@@ -26,7 +28,7 @@ eventosRoutes.post(
 );
 
 // Listar eventos
-eventosRoutes.get("/", listarEventos);
+//eventosRoutes.get("/", listarEventos);
 
 // Detalhes de um evento
 eventosRoutes.get(
@@ -51,5 +53,13 @@ eventosRoutes.delete(
   validarSchemaMiddleware(deletarEventoSchema.shape.params, "PARAMS"),
   deletarEvento
 );
+
+// Buscar evento
+eventosRoutes.get(
+  "/",
+  validarTokenMiddleware,
+  validarSchemaMiddleware(buscarEventosSchema.shape.query, "QUERY"),
+  BuscarEventos
+)
 
 export default eventosRoutes;
