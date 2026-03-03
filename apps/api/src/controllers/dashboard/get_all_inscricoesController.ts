@@ -34,6 +34,12 @@ export async function dashboardInscricoesController(
     response.porStatus[item.status as StatusInscricao] = quantidade;
   }
 
-  return res.json(response);
+  const taxaConversao =
+  response.total === 0
+    ? 0
+    : Number((response.porStatus.confirmada / response.total) * 100).toFixed(2);
+
+    return res.json({...response, taxaConversao,});
+
 
 }

@@ -26,3 +26,5 @@ dashinscricoes.get(
   dashboardInscricoesPorEventoController,
   validarResponseMiddleware(dashboardInscricoesSchema)
 );
+
+

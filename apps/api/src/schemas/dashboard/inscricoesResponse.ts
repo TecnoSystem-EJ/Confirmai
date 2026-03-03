@@ -36,6 +36,15 @@ const dashboardInscricoesSchema = z
       .openapi({
         description: "Quantidade de inscrições agrupadas por status",
       }),
+      
+    taxaConversao: z
+    .number()
+    .min(0)
+    .max(100)
+    .openapi({
+      description: "Percentual das inscrições confirmadas sobre o total",
+      example: 76.92
+    })
   })
   .strict();
 
