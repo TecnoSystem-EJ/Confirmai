@@ -6,6 +6,8 @@ export async function dashboardInscricoesController(
   req: Request,
   res: Response,
 ) {
+
+  // Inscrições por status
   const totaisPorStatus = await prisma.inscricoes.groupBy({
     by: ["status"],
     where: {
@@ -34,12 +36,52 @@ export async function dashboardInscricoesController(
     response.porStatus[item.status as StatusInscricao] = quantidade;
   }
 
+  // Taxa de conversão no momento da requisição
   const taxaConversao =
   response.total === 0
     ? 0
     : Number((response.porStatus.confirmada / response.total) * 100).toFixed(2);
 
-    return res.json({...response, taxaConversao,});
+  
+
+  // Média da taxa de inscrições por dia
+    const inscricoesPorDia = await prisma.$queryRaw<
+    { dia: Date; total: bigint; confirmadas: bigint }[]
+  >`
+    SELECT 
+      DATE(created_at) as dia,
+      COUNT(*) as total,
+      SUM(CASE WHEN status = 'confirmada' THEN 1 ELSE 0 END) as confirmadas
+    FROM inscricoes
+    WHERE tenant_id = ${req.tenant!.id}
+    GROUP BY DATE(created_at)
+  `;
+
+  let somaConversoes = 0;
+
+  for (const dia of inscricoesPorDia) {
+    const total = Number(dia.total);
+    const confirmadas = Number(dia.confirmadas ?? 0);
+
+    const conversao =
+      total === 0 ? 0 : (confirmadas / total) * 100;
+
+    somaConversoes += conversao;
+  }
+
+  const taxaConversaoMediaDiaria =
+    inscricoesPorDia.length === 0
+      ? 0
+      : Number(
+          (somaConversoes / inscricoesPorDia.length).toFixed(2)
+        );
+
+      return res.json({
+    ...response,
+    totaisPorStatus,
+    taxaConversao,
+    taxaConversaoMediaDiaria,
+  });
 
 
 }
