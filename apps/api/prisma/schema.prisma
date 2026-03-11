@@ -9,7 +9,7 @@ generator client {
 }
 
 datasource db {
-provider = "mysql"
+  provider = "mysql"
 }
 
 // Definição dos enums
@@ -105,6 +105,11 @@ model inscricoes {
   status    InscricaoStatus @default(pendente)
   createdAt DateTime        @default(now()) @map("created_at")
   updatedAt DateTime        @updatedAt @map("updated_at")
+  qr_hash   String?         @unique
+  qr_code   String?         @db.LongText
+  email_status String?      @default("pendente") // pendente | enviado | falhou
+  checkin_realizado Boolean @default(false)
+  checkin_data      DateTime?
 
   // Relacionamento com a tabela de Eventos
   evento eventos @relation(fields: [eventoId], references: [id], onDelete: Cascade, onUpdate: Cascade)

@@ -11,6 +11,10 @@ import {
   verificarEventoExistente,
 } from "../../services/eventoService";
 
+import { gerarCredenciaisIncricao } from "../../services/credenciaisInscricoesService";
+
+import { enviarEmailInscricao } from "../../services/enviarQrCodePorEmailService";
+
 const criarInscricao: RequestHandler<
   CriarInscricaoParamsSchema,
   CriarInscricaoResponseSchema,
@@ -23,6 +27,9 @@ const criarInscricao: RequestHandler<
   //verifica se o evento existe
   const evento = await verificarEventoExistente(evento_id, req.tenant!.id);
   verificarEventoEncerradoOuSemVagas(evento);
+
+  const { hash, qrCode } = await gerarCredenciaisIncricao();
+
 
   const usuarioInscrito = await prisma.inscricoes.findFirst({
     where: {
@@ -41,6 +48,8 @@ const criarInscricao: RequestHandler<
     data: {
       eventoId: evento_id,
       tenantId: req.tenant!.id,
+      qr_hash: hash,
+      qr_code: qrCode,
       nome,
       email,
       curso,
@@ -61,6 +70,8 @@ const criarInscricao: RequestHandler<
       },
     },
   });
+
+  await enviarEmailInscricao(novaInscricao.id, email, nome, qrCode, evento.titulo);
 
   //retorna a inscrição criada
   return res.status(201).json({

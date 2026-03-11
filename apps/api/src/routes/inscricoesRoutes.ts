@@ -3,6 +3,8 @@ import {
   buscarInscricoes,
   criarInscricao,
   exportarInscricoesParaCSV,
+  validarCheckin, 
+  confirmarCheckin
 } from "../controllers/inscricoes";
 import {
   validarSchemaMiddleware,
@@ -35,5 +37,9 @@ inscricoesRoutes.get(
   ),
   exportarInscricoesParaCSV
 );
+
+// checar qr code
+inscricoesRoutes.post("/checkin/validar", validarCheckin);
+inscricoesRoutes.post("/checkin/confirmar", confirmarCheckin);
 
 export default inscricoesRoutes;
