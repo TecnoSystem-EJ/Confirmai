@@ -10,7 +10,6 @@ const listarEventos: RequestHandler<
 > = async (req, res) => {
   const eventos = await prisma.eventos.findMany({
     where: {
-      status: "ativo",
       tenantId: req.tenant!.id,
     },
   });

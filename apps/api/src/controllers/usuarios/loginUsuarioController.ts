@@ -15,10 +15,10 @@ const loginUsuario: RequestHandler<
   LoginUsuarioRequestSchema,
   any
 > = async (req, res) => {
-  const { email, senha } = req.body;
+  const { email, senha, tenantId } = req.body;
 
   const usuario = await prisma.usuarios.findFirst({
-    where: { email },
+    where: { email, tenantId: tenantId ?? null },
   });
 
   if (!usuario) throw new NaoAutorizadoException("email/senha incorreta");
@@ -27,7 +27,7 @@ const loginUsuario: RequestHandler<
 
   if (!senhaValida) throw new NaoAutorizadoException("email/senha incorreta");
 
-  if (usuario.tenantId && usuario.tenantId !== req.tenant?.id) {
+  if (usuario.tenantId && usuario.tenantId !== tenantId) {
     throw new NaoAutorizadoException("email/senha incorreta");
   }
 
@@ -40,11 +40,11 @@ const loginUsuario: RequestHandler<
       email: usuario.email,
       cargo: usuario.cargo,
       tenant: {
-        id: req.tenant!.id,
+        id: usuario.tenantId ?? null,
       },
     },
     JWT_SECRET,
-    { expiresIn: "1d" }
+    { expiresIn: "1d" },
   );
 
   const expiraEm = new Date();

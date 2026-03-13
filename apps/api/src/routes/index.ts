@@ -1,7 +1,11 @@
 import { Router } from "express";
-import { identificarTenantMiddleware } from "../middlewares";
+import {
+  identificarTenantMiddleware,
+  validarSchemaMiddleware,
+} from "../middlewares";
+import paramTenantSlugSchema from "../schemas/tenantSlugParamSchema";
+import cartRoutes from "./cartRoutes";
 import eventosRoutes from "./eventosRoutes";
-import inscricoesRoutes from "./inscricoesRoutes";
 import tenantsRoutes from "./tenantsRoutes";
 import usuariosRoutes from "./usuariosRoutes";
 
@@ -12,11 +16,15 @@ routes.get("/", (_req, res) => {
 });
 
 routes.use("/tenants", tenantsRoutes);
-
-routes.use(identificarTenantMiddleware);
-
-routes.use("/eventos", eventosRoutes);
 routes.use("/usuarios", usuariosRoutes);
-routes.use("/inscricoes", inscricoesRoutes);
+
+routes.use(
+  "/:tenantSlug",
+  validarSchemaMiddleware(paramTenantSlugSchema, "PARAMS"),
+  identificarTenantMiddleware,
+);
+
+routes.use("/:tenantSlug/eventos", eventosRoutes);
+routes.use("/:tenantSlug/cart", cartRoutes);
 
 export default routes;

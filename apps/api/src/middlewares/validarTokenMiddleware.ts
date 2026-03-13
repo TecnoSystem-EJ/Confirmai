@@ -10,14 +10,14 @@ type JwtPayload = {
   email: string;
   cargo: "admin" | "membro" | "global_admin";
   tenant?: {
-    id: string;
+    id: string | null;
   };
 };
 
 const validarTokenMiddleware: RequestHandler<any, any, any, any> = async (
   req,
   _res,
-  next
+  next,
 ) => {
   const authHeader = req.headers["authorization"];
 
@@ -49,11 +49,14 @@ const validarTokenMiddleware: RequestHandler<any, any, any, any> = async (
       throw new NaoAutorizadoException("Token mal formatado");
     }
 
-    if (decoded.tenant.id !== req.tenant!.id) {
+    if (
+      req.params?.tenantSlug &&
+      decoded.tenant.id !== (req.tenant?.id || null)
+    ) {
       throw new ProibidoException("Token de acesso não corresponde a empresa");
     }
   } else {
-    decoded.tenant!.id = req.tenant!.id;
+    decoded.tenant!.id = req.tenant?.id ?? null;
   }
 
   req.user = decoded;

@@ -29,12 +29,10 @@ const tenantScehma = z
       description: "URL do site da tenant",
       example: "https://site-tenant.com",
     }),
-    status: z
-      .enum(["ativo", "cancelado", "suspenso"])
-      .openapi({
-        description: "Status da tenant",
-        examples: ["ativo", "cancelado", "suspenso"],
-      }),
+    status: z.enum(["ativo", "cancelado", "suspenso"]).openapi({
+      description: "Status da tenant",
+      examples: ["ativo", "cancelado", "suspenso"],
+    }),
     createdAt: z.date().openapi({ description: "Data de criação" }),
     updated_at: z.date().openapi({ description: "Data de atuallização" }),
   })

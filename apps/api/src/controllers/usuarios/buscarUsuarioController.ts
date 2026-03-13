@@ -13,8 +13,15 @@ const buscarUsuario: RequestHandler<
     where: {
       id: req.user!.id,
     },
-    omit: {
-      senhaHash: true,
+    select: {
+      id: true,
+      nome: true,
+      email: true,
+      cargo: true,
+      tenantId: true,
+      createdAt: true,
+      updatedAt: true,
+      tenant: true,
     },
   });
 

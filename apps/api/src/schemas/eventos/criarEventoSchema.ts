@@ -17,6 +17,9 @@ const criarEventoSchema = z
         descricao: z
           .string("A descrição deve ser uma string.")
           .optional()
+          .transform((desc) =>
+            desc === undefined || desc === "" ? null : desc,
+          )
           .openapi({
             description: "Descrição do evento (opcional)",
             example: "Descrição teste",
@@ -24,17 +27,24 @@ const criarEventoSchema = z
         closingDate: z.iso
           .date("A data de encerramento deve estar no formato ISO 8601.")
           .nonoptional("O campo 'closing_date' é obrigatório.")
+          .transform((date) => new Date(date))
           .openapi({
             description: "Data de encerramento do evento",
             example: new Date().toISOString().split("T")[0],
           }),
-        limiteVagas: z
-          .int("O campo 'limiteVagas' deve ser um número insteiro")
-          .optional()
+        startDate: z.iso
+          .date("A data de início deve estar no formato ISO 8601.")
+          .nonoptional("O campo 'start_date' é obrigatório.")
+          .transform((date) => new Date(date))
           .openapi({
-            description: "Número limite de vagas do evento (opcional)",
-            example: 5,
+            description: "Data de início do evento",
+            example: new Date().toISOString().split("T")[0],
           }),
+      })
+      .refine((data) => data.startDate <= data.closingDate, {
+        message:
+          "A data de encerramento deve ser maior ou igual a data de início.",
+        path: ["closingDate", "startDate"],
       })
       .strict(),
     response: z

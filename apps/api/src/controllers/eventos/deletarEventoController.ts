@@ -1,5 +1,6 @@
 import { RequestHandler } from "express";
 import { prisma } from "../../config/database";
+import { AppException } from "../../exceptions";
 import {
   DeletarEventoParamsSchema,
   DeletarEventoResponseSchema,
@@ -16,17 +17,33 @@ const deletarEvento: RequestHandler<
 
   await verificarEventoExistente(id, req.tenant!.id);
 
-  await prisma.eventos.update({
+  const countTicketsSold = await prisma.batchTicket.count({
+    where: {
+      soldQuantity: {
+        gt: 0,
+      },
+      batch: {
+        eventId: id,
+      },
+    },
+  });
+
+  if (countTicketsSold > 0) {
+    throw new AppException(
+      "Não é possível deletar eventos que já possuem ingressos vendidos.",
+      400,
+      "Bad Request",
+    );
+  }
+
+  await prisma.eventos.delete({
     where: {
       id,
       tenantId: req.tenant!.id,
     },
-    data: {
-      status: "encerrado",
-    },
   });
 
-  return res.status(204).json({ mensagem: "Evento deletado com sucesso" });
+  return res.status(204).json();
 };
 
 export default deletarEvento;

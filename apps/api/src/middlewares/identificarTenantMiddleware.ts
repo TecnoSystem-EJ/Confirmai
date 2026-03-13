@@ -4,13 +4,11 @@ import { verificarTenantExistente } from "../services/tenantService";
 const identificarTenantMiddleware: RequestHandler<any, any, any, any> = async (
   req,
   _res,
-  next
+  next,
 ) => {
-  const host = req.hostname; // ex: empresa.seuapp.com ou www.empresa.com
+  const { tenantSlug } = req.params;
 
-  const subdomain = host.split(".")[0]; // empresa de empresa.seuapp.com
-
-  const tenant = await verificarTenantExistente(subdomain);
+  const tenant = await verificarTenantExistente(tenantSlug);
 
   req.tenant = {
     id: tenant.id,

@@ -20,3 +20,8 @@ export const FRONTEND_URL =
 export const GLOBAL_ADMIN_SENHA = String(process.env.GLOBAL_ADMIN_SENHA);
 export const GLOBAL_ADMIN_EMAIL = String(process.env.GLOBAL_ADMIN_EMAIL);
 export const GLOBAL_ADMIN_NOME = String(process.env.GLOBAL_ADMIN_NOME);
+
+export const SERVICE_FEE = 10;
+
+export const STRIPE_SECRET_KEY = String(process.env.STRIPE_SECRET_KEY);
+export const RESERVATION_TTL = Number(15 * 60 * 1000);

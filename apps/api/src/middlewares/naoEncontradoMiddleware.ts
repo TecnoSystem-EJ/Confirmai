@@ -3,7 +3,7 @@ import { NaoEncontradoException } from "../exceptions";
 
 const naoEncontradoMiddleware: RequestHandler<any, any, any, any> = async (
   _req,
-  _res
+  _res,
 ) => {
   throw new NaoEncontradoException("A rota requisitada não foi encontrada");
 };
