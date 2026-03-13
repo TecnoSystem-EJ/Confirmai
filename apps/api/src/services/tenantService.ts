@@ -1,6 +1,10 @@
 import { FRONTEND_URL } from "../config/constants";
 import { prisma } from "../config/database";
-import { NaoAutorizadoException, NaoEncontradoException } from "../exceptions";
+import {
+  AppException,
+  NaoAutorizadoException,
+  NaoEncontradoException,
+} from "../exceptions";
 
 export const gerarTenantSlug = (slug: string): string => {
   let endIndex = 7;
@@ -43,6 +47,10 @@ export const verificarCNPJ = (cnpj: string): boolean => {
 };
 
 export const verificarTenantExistente = async (slug: string) => {
+  if (!slug) {
+    throw new AppException("Tenant slug não informado.", 400, "Bad Request");
+  }
+
   const tenant = await prisma.tenants.findUnique({
     where: { slug },
   });
