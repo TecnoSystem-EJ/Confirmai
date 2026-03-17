@@ -4,13 +4,11 @@ import usuarioSchema from "./usuarioSchema";
 
 const buscarUsuariosSchema = z
   .object({
-    response: z
-      .array(usuarioSchema.omit({ tenantId: true }))
-      .or(
-        usuarioSchema.extend({
-          tenant: tenantScehma.pick({ nome: true, slug: true }),
-        })
-      ),
+    response: z.array(usuarioSchema.omit({ tenantId: true })).or(
+      usuarioSchema.extend({
+        tenant: tenantScehma.pick({ nome: true, slug: true }),
+      }),
+    ),
   })
   .strict();
 

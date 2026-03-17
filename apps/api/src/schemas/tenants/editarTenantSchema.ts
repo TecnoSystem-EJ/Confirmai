@@ -18,12 +18,10 @@ const editarTenantSchema = z.object({
         example: "Tenant atualizada com sucesso",
       }),
       tenant: tenantScehma,
-      acesso_url: z
-        .url()
-        .openapi({
-          description: "URL de acesso a tenant",
-          example: generateSlug("slug-teste"),
-        }),
+      acesso_url: z.url().openapi({
+        description: "URL de acesso a tenant",
+        example: generateSlug("slug-teste"),
+      }),
     })
     .strict(),
 });

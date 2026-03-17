@@ -1,4 +1,5 @@
 import { OpenAPIRegistry } from "@asteasolutions/zod-to-openapi";
+import badRequestErroSchema from "../../schemas/error/badRequestErroSchema";
 import conflictErroSchema from "../../schemas/error/conflictErroSchema";
 import forbiddenErroSchema from "../../schemas/error/forbiddenErroSchema";
 import notFoundErroSchema from "../../schemas/error/notFoundErroSchema";
@@ -14,30 +15,30 @@ const usuariosRegistry = new OpenAPIRegistry();
 
 const RegistrarUsuarioRequestRegister = usuariosRegistry.register(
   "RegistrarUsuarioRequest",
-  registrarUsuarioSchema.shape.request
+  registrarUsuarioSchema.shape.request,
 );
 const RegistrarUsuarioResponseRegister = usuariosRegistry.register(
   "RegistrarUsuarioResponse",
-  registrarUsuarioSchema.shape.response
+  registrarUsuarioSchema.shape.response,
 );
 
 const LoginUsuarioResponseRegister = usuariosRegistry.register(
   "LoginUsuarioResponse",
-  loginUsuarioSchema.shape.response
+  loginUsuarioSchema.shape.response,
 );
 const LoginUsuarioRequestRegister = usuariosRegistry.register(
   "LoginUsuarioRequest",
-  loginUsuarioSchema.shape.request
+  loginUsuarioSchema.shape.request,
 );
 
 const BuscarUsuarioResponseRegister = usuariosRegistry.register(
   "BuscarUsuarioResponse",
-  buscarUsuarioSchema.shape.response
+  buscarUsuarioSchema.shape.response,
 );
 
 const BuscarUsuariosResponseRegister = usuariosRegistry.register(
   "BuscarUsuariosResponse",
-  buscarUsuariosSchema.shape.response
+  buscarUsuariosSchema.shape.response,
 );
 
 // Registrar Usuário
@@ -188,9 +189,58 @@ usuariosRegistry.registerPath({
 // Buscar Usuários
 usuariosRegistry.registerPath({
   method: "get",
-  path: "/usuarios/all",
+  path: "/usuarios/{tenantSlug}/all",
   tags: ["Usuarios"],
   summary: "Buscar todos os usuários",
+  security: [{ bearerAuth: [] }],
+  responses: {
+    200: {
+      description: "Usuários retornados",
+      content: {
+        "application/json": { schema: BuscarUsuariosResponseRegister },
+      },
+    },
+    400: {
+      description: "Bad Request",
+      content: {
+        "application/json": { schema: badRequestErroSchema },
+      },
+    },
+    401: {
+      description: "Unauthorized",
+      content: {
+        "application/json": { schema: unauthorizedErroSchema },
+      },
+    },
+    403: {
+      description: "Forbidden",
+      content: {
+        "application/json": { schema: forbiddenErroSchema },
+      },
+    },
+    404: {
+      description: "Not Found",
+      content: {
+        "application/json": { schema: notFoundErroSchema },
+      },
+    },
+    500: {
+      description: "Erro interno do servidor",
+      content: {
+        "application/json": {
+          schema: servidorErroSchema,
+        },
+      },
+    },
+  },
+});
+
+// Buscar Usuários na Tenant
+usuariosRegistry.registerPath({
+  method: "get",
+  path: "/usuarios/{tenantSlug}/all",
+  tags: ["Usuarios"],
+  summary: "Buscar todos os usuários da tenant",
   security: [{ bearerAuth: [] }],
   responses: {
     200: {

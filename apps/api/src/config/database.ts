@@ -1,11 +1,11 @@
 import { PrismaMariaDb } from "@prisma/adapter-mariadb";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from "../../generated/prisma";
 import {
   DATABASE_HOST,
   DATABASE_NAME,
   DATABASE_PASSWORD,
-  DATABASE_USER,
   DATABASE_PORT,
+  DATABASE_USER,
 } from "./constants";
 
 const adapter = new PrismaMariaDb({

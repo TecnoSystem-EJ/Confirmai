@@ -25,7 +25,7 @@ const criarTenantSchema = z.object({
           (cnpj) => {
             return verificarCNPJ(cnpj);
           },
-          { error: "Cnpj mal formatado" }
+          { error: "Cnpj mal formatado" },
         )
         .openapi({
           description: "CNPJ da tenant",
@@ -38,10 +38,10 @@ const criarTenantSchema = z.object({
         .refine(
           (cnpj) => {
             return /^(?:\+55\s?)?(?:\(?[1-9][0-9]\)?\s?)?(?:9?\d{4})-?\d{4}$/.test(
-              cnpj
+              cnpj,
             );
           },
-          { error: "Telefone mal formatado" }
+          { error: "Telefone mal formatado" },
         )
         .openapi({
           description: "Telefone da tenant",
@@ -82,9 +82,9 @@ const criarTenantSchema = z.object({
             .split(" ")
             .map(
               (palavra) =>
-                palavra.charAt(0).toUpperCase() + palavra.substring(1)
+                palavra.charAt(0).toUpperCase() + palavra.substring(1),
             )
-            .join(" ")
+            .join(" "),
         )
         .openapi({
           description: "Nome do usuário admin",

@@ -1,0 +1,7 @@
+.env
+package.json
+prisma.config.ts
+tsconfig.json
+prisma
+node_modules
+generated

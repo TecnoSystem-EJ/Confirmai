@@ -6,6 +6,38 @@ import {
 } from "./constants";
 import { prisma } from "./database";
 
+const ticketTypes = [
+  {
+    name: "Inteira",
+    description: "Ingresso valor integral",
+  },
+  {
+    name: "Meia Entrada",
+    description:
+      "Estudantes, idosos, PCD (conforme lei 12.933/2013). Apresentar documento comprobatório na entrada.",
+  },
+  {
+    name: "VIP",
+    description: "Acesso a áreas exclusivas",
+  },
+  {
+    name: "Camarote",
+    description: "Área premium com serviços diferenciados",
+  },
+  {
+    name: "Pista",
+    description: "Área comum do evento",
+  },
+  {
+    name: "Backstage",
+    description: "Acesso aos bastidores",
+  },
+  {
+    name: "Cortesia",
+    description: "Ingresso gratuito",
+  },
+];
+
 const seed = async () => {
   const adminExistente = await prisma.usuarios.findFirst({
     where: {
@@ -27,6 +59,19 @@ const seed = async () => {
 
     console.info("Global admin criado");
   }
+
+  for (const type of ticketTypes) {
+    const exists = await prisma.ticketType.findFirst({
+      where: { name: type.name },
+    });
+
+    if (!exists) {
+      await prisma.ticketType.create({
+        data: type,
+      });
+      console.info(`TicketType ${type.name} criado`);
+    }
+  }
 };
 
 if (process.argv[1] === import.meta.filename) {
@@ -40,6 +85,5 @@ if (process.argv[1] === import.meta.filename) {
       process.exit(1);
     });
 }
-
 
 export default seed;

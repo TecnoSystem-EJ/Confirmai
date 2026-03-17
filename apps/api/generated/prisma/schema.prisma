@@ -1,0 +1,422 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+// Definição dos enums
+
+enum EventoStatus {
+  ativo
+  encerrado
+  rascunho
+}
+
+enum CargoUsuario {
+  membro
+  admin
+  global_admin
+}
+
+enum InscricaoStatus {
+  pendente
+  confirmada
+  cancelada
+}
+
+enum TenantStatus {
+  ativo
+  cancelado
+  suspenso
+}
+
+enum TicketStatus {
+  VALID
+  USED
+  CANCELED
+  REFUNDED
+}
+
+enum StripeAccountType {
+  STANDARD
+  EXPRESS
+  CUSTOM
+}
+
+enum StripeAccountStatus {
+  PENDING
+  ENABLED
+  DISABLED
+  RESTRICTED
+}
+
+enum StripeAccountBusinessType {
+  INDIVIDUAL
+  COMPANY
+}
+
+enum OrderStatus {
+  PENDING // Aguardando pagamento
+  PROCESSING // Processando pagamento
+  PAID // Pago
+  CONFIRMED // Confirmado (tickets gerados)
+  EXPIRED // Expirado (PIX/Boleto)
+  FAILED // Falha no pagamento
+  CANCELED // Cancelado pelo usuário/admin
+  REFUNDED // Reembolsado
+  PARTIAL_REFUND // Reembolso parcial
+}
+
+enum PaymentMethod {
+  CREDIT_CARD
+  DEBIT_CARD
+  PIX
+  BOLETO
+  WALLET // Apple Pay, Google Pay
+}
+
+enum ReservationStatus {
+  ACTIVE // Reserva ativa
+  EXPIRED // Expirou
+  CONVERTED // Convertida em compra
+  CANCELLED // Cancelada pelo usuário
+}
+
+// Definição dos modelos
+
+model tenants {
+  id         String       @id @default(uuid())
+  nome       String
+  cnpj       String       @unique @db.VarChar(14)
+  telefone   String       @db.VarChar(20)
+  email      String       @unique
+  site       String?
+  slug       String       @unique // para subdomínio: empresa.seuapp.com
+  status     TenantStatus @default(ativo) // ativo, suspenso, cancelado
+  createdAt  DateTime     @default(now()) @map("created_at")
+  updated_at DateTime     @updatedAt @map("updated_at")
+
+  // Configurações
+  logoUrl String? @map("logo_url")
+
+  // Relacionamentos
+  usuarios      usuarios[]
+  eventos       eventos[]
+  stripeAccount StripeAccount?
+  orders        Order[]
+}
+
+model eventos {
+  id          String       @id @default(uuid())
+  tenantId    String       @map("tenant_id")
+  titulo      String
+  descricao   String?      @db.Text
+  linkSlug    String       @unique @map("link_slug")
+  startDate   DateTime     @default(now()) @map("start_date")
+  closingDate DateTime     @map("closing_date")
+  status      EventoStatus @default(ativo)
+  createdAt   DateTime     @default(now()) @map("created_at")
+  updatedAt   DateTime     @updatedAt @map("updated_at")
+
+  tenant  tenants  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  batches Batch[]
+  // orders  Order[]
+  tickets Ticket[]
+  orders  Order[]
+
+  @@unique([tenantId, linkSlug])
+}
+
+model Batch {
+  id          String   @id @default(uuid())
+  eventId     String
+  name        String // "1º Lote", "2º Lote", "Lote VIP"
+  description String?
+  startDate   DateTime @map("start_date")
+  endDate     DateTime @map("end_date")
+  isActive    Boolean  @default(true) @map("is_active")
+  totalSold   Int      @default(0) @map("total_sold")
+  order       Int      @default(0) // Ordem de exibição
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  event        eventos       @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  batchTickets BatchTicket[]
+
+  @@index([eventId])
+  @@map("batches")
+}
+
+model TicketType {
+  id          String   @id @default(uuid())
+  name        String // "Inteira", "Meia", "VIP"
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  batchTickets BatchTicket[]
+
+  @@map("ticket_types")
+}
+
+model BatchTicket {
+  id               String   @id @default(uuid())
+  batchId          String   @map("batch_id")
+  ticketTypeId     String   @map("ticket_type_id")
+  price            Decimal  @db.Decimal(19, 4) // Preço do ingresso
+  quantity         Int // Quantidade disponível
+  soldQuantity     Int      @default(0) @map("sold_quantity")
+  reservedQuantity Int      @default(0) @map("reserved_quantity")
+  isActive         Boolean  @default(true) @map("is_active")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  batch        Batch         @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  ticketType   TicketType    @relation(fields: [ticketTypeId], references: [id])
+  tickets      Ticket[]
+  orderItems   OrderItem[]
+  reservations Reservation[]
+
+  @@unique([batchId, ticketTypeId])
+  @@index([batchId])
+  @@map("batch_tickets")
+}
+
+model Ticket {
+  id            String @id @default(uuid())
+  orderId       String @map("order_id")
+  eventId       String @map("event_id")
+  batchTicketId String @map("batch_ticket_id")
+
+  hash          String       @unique // Hash único para QR Code
+  ownerName     String       @map("owner_name")
+  ownerEmail    String       @map("owner_email")
+  ownerDocument String?      @map("owner_document")
+  price         Decimal      @db.Decimal(19, 4)
+  status        TicketStatus @default(VALID)
+
+  checkedInAt DateTime?
+  checkedInBy String? // User/Staff que fez check-in
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  order         Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  event         eventos     @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  batchTicket   BatchTicket @relation(fields: [batchTicketId], references: [id])
+  checkedInUser usuarios?   @relation("checked-in", fields: [checkedInBy], references: [id])
+
+  @@index([orderId])
+  @@index([eventId])
+  @@index([hash])
+  @@map("tickets")
+}
+
+model usuarios {
+  id        String       @id @default(uuid())
+  tenantId  String?      @map("tenant_id")
+  nome      String
+  email     String
+  senhaHash String       @map("senha_hash")
+  cargo     CargoUsuario @default(membro)
+  createdAt DateTime     @default(now()) @map("created_at")
+  updatedAt DateTime     @updatedAt @map("updated_at")
+
+  tenant  tenants? @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  orders  Order[]
+  tickets Ticket[] @relation("checked-in")
+
+  @@unique([tenantId, email])
+}
+
+model GlobalPaymentConfig {
+  id String @id @default(uuid())
+
+  // Configurações padrão da plataforma
+  defaultPlatformFeePercent Decimal @default(10) @map("default_platform_fee_percent") @db.Decimal(5, 2)
+  defaultPlatformFeeFixed   Decimal @default(0) @map("default_platform_fee_fixed") @db.Decimal(10, 2)
+
+  defaultServiceFeePercent   Decimal @default(0) @map("default_service_fee_percent") @db.Decimal(5, 2)
+  defaultServiceFeeFixed     Decimal @default(5) @map("default_service_fee_fixed") @db.Decimal(10, 2)
+  defaultServiceFeePayerType String  @default("buyer") @map("default_service_fee_payer_type")
+
+  // Métodos de pagamento globais
+  acceptCreditCard Boolean @default(true) @map("accept_credit_card")
+  acceptDebitCard  Boolean @default(true) @map("accept_debit_card")
+  acceptPix        Boolean @default(true) @map("accept_pix")
+  acceptBoleto     Boolean @default(false) @map("accept_boleto")
+
+  // Parcelamento
+  maxInstallments     Int     @default(5) @map("max_installments")
+  minInstallmentValue Decimal @default(50) @map("min_installment_value") @db.Decimal(19, 4)
+  interestFree        Int     @default(3) @map("interest_free")
+
+  // Política de reembolso
+  allowRefunds       Boolean @default(true) @map("allow_refunds")
+  refundDeadlineDays Int     @default(7) @map("refund_deadline_days")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("global_payment_config")
+}
+
+model StripeAccount {
+  id       String @id @default(uuid())
+  tenantId String @unique @map("tenant_id")
+
+  // Dados da conta Stripe Connect
+  accountId     String              @unique @map("account_id") // acc_xxxxx 
+  accountType   StripeAccountType   @default(STANDARD) @map("account_type")
+  accountStatus StripeAccountStatus @default(PENDING) @map("account_status")
+
+  // Status de ativação 
+  detailsSubmitted Boolean @default(false) @map("details_submitted")
+  chargesEnabled   Boolean @default(false) @map("charges_enabled")
+  payoutsEnabled   Boolean @default(false) @map("payouts_enabled")
+
+  // Dados adicionais
+  country      String                     @default("BR")
+  currency     String                     @default("brl")
+  email        String?
+  businessType StripeAccountBusinessType? @map("business_type") // individual, company
+
+  // Timestamps importantes
+  onboardedAt DateTime? @map("onboarded_at")
+  lastSyncAt  DateTime? @map("last_sync_at")
+
+  // Metadata
+  requirementsData Json? @map("requirements_data") // Armazena requirements do Stripe
+  capabilitiesData Json? @map("capabilities_data") // Armazena capabilities
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  tenant tenants @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([accountId])
+  @@index([tenantId])
+  @@map("stripe_accounts")
+}
+
+model Order {
+  id       String @id @default(uuid())
+  tenantId String @map("tenant_id")
+  eventId  String @map("event_id")
+  userId   String @map("user_id")
+
+  // Valores monetários
+  subtotal    Decimal @db.Decimal(19, 4) // Soma dos ingressos
+  serviceFee  Decimal @map("service_fee") @db.Decimal(19, 4) // Taxa de serviço
+  platformFee Decimal @map("platform_fee") @db.Decimal(19, 4) // Comissão da plataforma
+  total       Decimal @db.Decimal(19, 4) // Total pago pelo cliente
+
+  // Status do pedido
+  status OrderStatus @default(PENDING)
+
+  // Dados de pagamento
+  paymentMethod   PaymentMethod? @map("payment_method")
+  paymentProvider String?        @default("stripe") @map("payment_provider") // stripe, mercadopago
+
+  // Stripe específico
+  stripePaymentIntentId String? @unique @map("stripe_payment_intent_id")
+  stripeClientSecret    String? @map("stripe_client_secret")
+  stripeTransferId      String? @map("stripe_transfer_id") // ID da transferência para o tenant
+  stripeApplicationFee  Int?    @map("stripe_application_fee") // Valor da application fee em centavos
+
+  // URLs e dados extras
+  paymentUrl    String? @map("payment_url") // Para PIX/Boleto
+  qrCodeData    String? @map("qr_code_data") @db.Text // QR Code do PIX
+  boletoBarcode String? @map("boleto_barcode")
+
+  // Timestamps importantes
+  paidAt      DateTime? @map("paid_at")
+  confirmedAt DateTime? @map("confirmed_at")
+  canceledAt  DateTime? @map("canceled_at")
+  refundedAt  DateTime? @map("refunded_at")
+  expiresAt   DateTime? @map("expires_at") // Para PIX/Boleto
+
+  // Observações
+  notes        String? @db.Text
+  cancelReason String? @map("cancel_reason") @db.Text
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relações
+  tenant     tenants     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  event      eventos     @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  usuario    usuarios    @relation(fields: [userId], references: [id])
+  tickets    Ticket[]
+  orderItems OrderItem[]
+
+  @@index([tenantId])
+  @@index([eventId])
+  @@index([stripePaymentIntentId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("orders")
+}
+
+// Itens do pedido (útil para rastreamento e relatórios)
+model OrderItem {
+  id            String @id @default(uuid())
+  orderId       String @map("order_id")
+  batchTicketId String @map("batch_ticket_id")
+
+  // Dados no momento da compra (snapshot)
+  ticketTypeName String  @map("ticket_type_name")
+  batchName      String  @map("batch_name")
+  quantity       Int
+  price          Decimal @db.Decimal(19, 4) // Preço unitário
+  total          Decimal @db.Decimal(19, 4) // quantity
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  order       Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  batchTicket BatchTicket @relation(fields: [batchTicketId], references: [id])
+
+  @@index([orderId])
+  @@index([batchTicketId])
+  @@map("order_items")
+}
+
+model Reservation {
+  id            String @id @default(uuid())
+  batchTicketId String @map("batch_ticket_id")
+
+  // Identificação da sessão/usuário
+  userId String @map("user_id")
+
+  quantity Int // Quantidade reservada
+
+  // Expiração
+  expiresAt DateTime @map("expires_at")
+
+  // Status
+  status ReservationStatus @default(ACTIVE)
+
+  // Metadata
+  ipAddress String? @map("ip_address")
+  userAgent String? @map("user_agent")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  batchTicket BatchTicket @relation(fields: [batchTicketId], references: [id], onDelete: Cascade)
+
+  @@index([batchTicketId])
+  @@index([expiresAt])
+  @@index([status])
+  @@map("reservations")
+}

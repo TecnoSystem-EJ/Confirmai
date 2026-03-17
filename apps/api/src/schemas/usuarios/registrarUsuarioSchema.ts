@@ -16,9 +16,9 @@ const registrarUsuarioSchema = z.object({
             .split(" ")
             .map(
               (palavra) =>
-                palavra.charAt(0).toUpperCase() + palavra.substring(1)
+                palavra.charAt(0).toUpperCase() + palavra.substring(1),
             )
-            .join(" ")
+            .join(" "),
         )
         .openapi({ description: "Usuário teste", example: "Usuário teste" }),
       email: z
@@ -39,17 +39,38 @@ const registrarUsuarioSchema = z.object({
           example: "senha123",
         }),
       cargo: cargoUsuarioEnumSchema,
+      tenantId: z
+        .uuid("O campo 'tenantId' deve ser um UUID ou nulo")
+        .nullable()
+        .openapi({
+          description: "Id da tenant do usuário ou null (se for global_admin)",
+        }),
+    })
+    .superRefine((obj, ctx) => {
+      if (obj.cargo === "global_admin" && obj.tenantId) {
+        ctx.addIssue({
+          code: "custom",
+          message: "global_admin não deve possuir tenantId",
+          path: ["tenantId"],
+        });
+      }
+
+      if (obj.cargo !== "global_admin" && !obj.tenantId) {
+        ctx.addIssue({
+          code: "custom",
+          message: "tenantId é obrigatório para este cargo",
+          path: ["tenantId"],
+        });
+      }
     })
     .strict(),
 
   response: z
     .object({
-      mensagem: z
-        .string()
-        .openapi({
-          description: "Mensagem de sucesso da criação",
-          example: "Usuario cadastrado com sucesso!",
-        }),
+      mensagem: z.string().openapi({
+        description: "Mensagem de sucesso da criação",
+        example: "Usuario cadastrado com sucesso!",
+      }),
       usuario: usuarioSchema,
     })
     .strict(),
