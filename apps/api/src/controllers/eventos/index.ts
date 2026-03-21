@@ -3,6 +3,7 @@ import deletarEvento from "./deletarEventoController";
 import detalhesEvento from "./detalhesEventoController";
 import editarEvento from "./editarEventoController";
 import listarEventos from "./listarEventosController";
+import BuscarEventos from "./buscarEventosController";
 
 // Batches
 import criarBatch from "./batches/criarBatchController";
@@ -42,6 +43,10 @@ export {
   listarBatches,
   listarBatchTickets,
   listarEventos,
+<<<<<<< HEAD
+  BuscarEventos
+=======
   // Ticket Types
   listarTicketTypes,
+>>>>>>> 89586659d4240bba5d75aaffe05a207cecb13e4d
 };

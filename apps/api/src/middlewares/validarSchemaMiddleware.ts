@@ -2,7 +2,7 @@ import { RequestHandler } from "express";
 import z from "zod";
 import { AppException } from "../exceptions";
 
-type SchemaType = "PARAMS" | "REQUEST_BODY";
+type SchemaType = "PARAMS" | "QUERY" | "REQUEST_BODY";
 
 const validarSchemaMiddleware =
   (
