@@ -19,6 +19,13 @@ const loginUsuarioSchema = z
             description: "Senha do usuário",
             example: "senha123",
           }),
+        tenantId: z
+          .uuid("O campo 'tenantId' deve ser um UUID ou nulo")
+          .nullable()
+          .openapi({
+            description:
+              "Id da tenant do usuário ou null (se for global_admin)",
+          }),
       })
       .strict(),
     response: z.object({

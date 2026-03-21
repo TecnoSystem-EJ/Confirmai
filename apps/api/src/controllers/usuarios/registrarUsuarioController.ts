@@ -13,12 +13,12 @@ const registrarUsuario: RequestHandler<
   RegistrarUsuarioRequestSchema,
   any
 > = async (req, res) => {
-  const { nome, email, senha, cargo } = req.body;
+  const { nome, email, senha, cargo, tenantId } = req.body;
 
   const usuarioExistente = await prisma.usuarios.findFirst({
     where: {
       email: email,
-      tenantId: req.tenant!.id,
+      tenantId: tenantId ?? null,
     },
   });
 
@@ -32,7 +32,7 @@ const registrarUsuario: RequestHandler<
     data: {
       nome,
       email,
-      tenantId: req.tenant!.id,
+      tenantId: tenantId ?? null,
       senhaHash,
       cargo,
     },

@@ -7,7 +7,7 @@ type SchemaType = "PARAMS" | "QUERY" | "REQUEST_BODY";
 const validarSchemaMiddleware =
   (
     schema: z.ZodObject,
-    type: SchemaType
+    type: SchemaType,
   ): RequestHandler<unknown, any, unknown, any> =>
   async (req, _res, next) => {
     let data;
@@ -23,7 +23,7 @@ const validarSchemaMiddleware =
       throw new AppException(
         result.error.issues.map((e) => `${e.code}: ${e.message}`),
         422,
-        `Erro de validação do ${type}`
+        `Erro de validação do ${type}`,
       );
     }
 

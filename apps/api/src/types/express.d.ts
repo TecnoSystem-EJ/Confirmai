@@ -7,7 +7,7 @@ declare global {
         email: string;
         cargo: "admin" | "membro" | "global_admin";
         tenant?: {
-          id: string;
+          id: string | null;
         };
       };
       tenant?: {

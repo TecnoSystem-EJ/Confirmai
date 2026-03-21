@@ -1,4 +1,5 @@
 import { OpenAPIRegistry } from "@asteasolutions/zod-to-openapi";
+import badRequestErroSchema from "../../schemas/error/badRequestErroSchema";
 import conflictErroSchema from "../../schemas/error/conflictErroSchema";
 import forbiddenErroSchema from "../../schemas/error/forbiddenErroSchema";
 import notFoundErroSchema from "../../schemas/error/notFoundErroSchema";
@@ -15,30 +16,30 @@ const tenantsRegistry = new OpenAPIRegistry();
 
 const CriarTenantRequestRegister = eventosRegistry.register(
   "CriarTenantRequest",
-  criarTenantSchema.shape.request
+  criarTenantSchema.shape.request,
 );
 const CriarTenantResponseRegister = eventosRegistry.register(
   "CriarTenantResponse",
-  criarTenantSchema.shape.response
+  criarTenantSchema.shape.response,
 );
 
 const BuscarTenantResponseRegister = eventosRegistry.register(
   "BuscarTenantResponse",
-  buscarTenantSchema.shape.response
+  buscarTenantSchema.shape.response,
 );
 
 const BuscarTodasTenantsResponseRegister = eventosRegistry.register(
   "BuscarTodasTenantsResponse",
-  buscarTodasTenantsSchema.shape.response
+  buscarTodasTenantsSchema.shape.response,
 );
 
 const EditarTenantResponseRegister = eventosRegistry.register(
   "EditarTenantResponse",
-  editarTenantSchema.shape.response
+  editarTenantSchema.shape.response,
 );
 const EditarTenantRequestRegister = eventosRegistry.register(
   "EditarTenantRequest",
-  editarTenantSchema.shape.request
+  editarTenantSchema.shape.request,
 );
 
 // Criar Tenant
@@ -89,7 +90,7 @@ eventosRegistry.registerPath({
 // Detalhes Evento
 eventosRegistry.registerPath({
   method: "get",
-  path: "/tenants/",
+  path: "/tenants/{tenantSlug}/",
   tags: ["Tenants"],
   summary: "Detalhes tenant",
   security: [{ bearerAuth: [] }],
@@ -98,6 +99,12 @@ eventosRegistry.registerPath({
       description: "Tenant retornada",
       content: {
         "application/json": { schema: BuscarTenantResponseRegister },
+      },
+    },
+    400: {
+      description: "Bad Request",
+      content: {
+        "application/json": { schema: badRequestErroSchema },
       },
     },
     401: {
@@ -175,7 +182,7 @@ eventosRegistry.registerPath({
 // Editar Evento
 eventosRegistry.registerPath({
   method: "put",
-  path: "/tenants/",
+  path: "/tenants/{tenantSlug}/",
   tags: ["Tenants"],
   summary: "Editar tenant",
   security: [{ bearerAuth: [] }],
@@ -193,6 +200,12 @@ eventosRegistry.registerPath({
       description: "Tenant atualizada",
       content: {
         "application/json": { schema: EditarTenantResponseRegister },
+      },
+    },
+    400: {
+      description: "Bad Request",
+      content: {
+        "application/json": { schema: badRequestErroSchema },
       },
     },
     401: {
@@ -241,12 +254,18 @@ eventosRegistry.registerPath({
 // Deletar Evento
 eventosRegistry.registerPath({
   method: "delete",
-  path: "/tenants/",
+  path: "/tenants/{tenantSlug}/",
   tags: ["Tenants"],
   summary: "Deletar tenant",
   responses: {
     204: {
       description: "Evento deletado",
+    },
+    400: {
+      description: "Bad Request",
+      content: {
+        "application/json": { schema: badRequestErroSchema },
+      },
     },
     401: {
       description: "Unauthorized",

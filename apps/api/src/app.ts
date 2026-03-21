@@ -13,7 +13,7 @@ const app = express();
 app.use(
   cors({
     origin: (origin, callback) => {
-      console.info(origin);
+      console.info(`Cors origin: ${origin}`);
       if (
         !origin ||
         origin?.includes("localhost") ||
@@ -26,7 +26,7 @@ app.use(
       }
     },
     credentials: true,
-  })
+  }),
 );
 app.use(express.json());
 
@@ -37,7 +37,7 @@ app.use(
       content: generateOpenAPI(),
     },
     theme: "purple",
-  })
+  }),
 );
 
 app.use("/api", routes);

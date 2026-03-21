@@ -10,12 +10,10 @@ const usuarioSchema = z
     nome: z
       .string()
       .openapi({ description: "Nome do usuário", example: "Usuário teste" }),
-    email: z
-      .email()
-      .openapi({
-        description: "E-mail do usuário",
-        example: "hello@example.com",
-      }),
+    email: z.email().openapi({
+      description: "E-mail do usuário",
+      example: "hello@example.com",
+    }),
     cargo: z.string().openapi({
       description: "Cargo do Usuário",
       examples: ["admin", "global_admin", "membro"],

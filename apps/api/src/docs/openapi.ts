@@ -4,6 +4,7 @@ import {
 } from "@asteasolutions/zod-to-openapi";
 import "../config/zodSetup";
 import eventosRegistry from "./routes/eventosDocs";
+import ingressosRegistry from "./routes/ingressosDocs";
 import inscricoesRegistry from "./routes/inscricoesDocs";
 import tenantsRegistry from "./routes/tenantsDocs";
 import usuariosRegistry from "./routes/usuariosDocs";
@@ -13,6 +14,7 @@ const globalRegistry = new OpenAPIRegistry([
   usuariosRegistry,
   tenantsRegistry,
   inscricoesRegistry,
+  ingressosRegistry,
 ]);
 
 globalRegistry.registerComponent("securitySchemes", "bearerAuth", {
@@ -35,14 +37,8 @@ export const generateOpenAPI = () => {
     },
     servers: [
       {
-        url: "http://{tenant}.lvh.me:3000/api", // Para desenvolvimento
+        url: "http://lvh.me:3333/api", // Para desenvolvimento
         description: "Servidor de Desenvolvimento",
-        variables: {
-          tenant: {
-            default: "empresa1",
-            description: "O slug do tenant (subdomínio)",
-          },
-        },
       },
       /* {
         url: "https://{tenant}.seudominio.com/api", // Para produção

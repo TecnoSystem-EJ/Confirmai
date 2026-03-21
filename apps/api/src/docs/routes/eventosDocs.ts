@@ -14,53 +14,53 @@ const eventosRegistry = new OpenAPIRegistry();
 
 const CriarEventoRequestRegister = eventosRegistry.register(
   "CriarEventoRequest",
-  criarEventoSchema.shape.request
+  criarEventoSchema.shape.request,
 );
 const CriarEventoResponseRegister = eventosRegistry.register(
   "CriarEventoResponse",
-  criarEventoSchema.shape.response
+  criarEventoSchema.shape.response,
 );
 
 const DetalhesEventoParamsRegister = eventosRegistry.register(
   "DetalhesEventoParams",
-  detalhesEventoSchema.shape.params
+  detalhesEventoSchema.shape.params,
 );
 const DetalhesEventoResponseRegister = eventosRegistry.register(
   "DetalhesEventoResponse",
-  detalhesEventoSchema.shape.response
+  detalhesEventoSchema.shape.response,
 );
 
 const ListarEventosResponseRegister = eventosRegistry.register(
   "ListarEventosResponse",
-  listarEventosSchema.shape.response
+  listarEventosSchema.shape.response,
 );
 
 const EditarEventoResponseRegister = eventosRegistry.register(
   "EditarEventoResponse",
-  editarEventoSchema.shape.response
+  editarEventoSchema.shape.response,
 );
 const EditarEventoRequestRegister = eventosRegistry.register(
   "EditarEventoRequest",
-  editarEventoSchema.shape.request
+  editarEventoSchema.shape.request,
 );
 const EditarEventoParamsRegister = eventosRegistry.register(
   "EditarEventoParams",
-  editarEventoSchema.shape.params
+  editarEventoSchema.shape.params,
 );
 
 const DeletarEventoResponseRegister = eventosRegistry.register(
   "DeletarEventoResponse",
-  deletarEventoSchema.shape.response
+  deletarEventoSchema.shape.response,
 );
 const DeletarEventoParamsRegister = eventosRegistry.register(
   "DeletarEventoParams",
-  deletarEventoSchema.shape.params
+  deletarEventoSchema.shape.params,
 );
 
 // Criar Evento
 eventosRegistry.registerPath({
   method: "post",
-  path: "/eventos/",
+  path: "/{tenantSlug}/eventos/",
   tags: ["Eventos"],
   summary: "Cria um novo evento",
   security: [{ bearerAuth: [] }],
@@ -118,7 +118,7 @@ eventosRegistry.registerPath({
 // Detalhes Evento
 eventosRegistry.registerPath({
   method: "get",
-  path: "/eventos/:id",
+  path: "/{tenantSlug}/eventos/{eventoId}",
   tags: ["Eventos"],
   summary: "Detalhes evento",
   request: {
@@ -171,7 +171,7 @@ eventosRegistry.registerPath({
 // Listar Eventos
 eventosRegistry.registerPath({
   method: "get",
-  path: "/eventos/",
+  path: "/{tenantSlug}/eventos/",
   tags: ["Eventos"],
   summary: "Listar todos os eventos ativos",
   responses: {
@@ -213,7 +213,7 @@ eventosRegistry.registerPath({
 // Editar Evento
 eventosRegistry.registerPath({
   method: "put",
-  path: "/eventos/:id",
+  path: "/{tenantSlug}/eventos/{eventoId}",
   tags: ["Eventos"],
   summary: "Editar evento",
   security: [{ bearerAuth: [] }],
@@ -274,7 +274,7 @@ eventosRegistry.registerPath({
 // Deletar Evento
 eventosRegistry.registerPath({
   method: "delete",
-  path: "/eventos/:id",
+  path: "/{tenantSlug}/eventos/{eventoId}",
   tags: ["Eventos"],
   summary: "Deletar evento",
   security: [{ bearerAuth: [] }],
@@ -284,6 +284,60 @@ eventosRegistry.registerPath({
   responses: {
     204: {
       description: "Evento deletado",
+      content: {
+        "application/json": { schema: DeletarEventoResponseRegister },
+      },
+    },
+    401: {
+      description: "Unauthorized",
+      content: {
+        "application/json": { schema: unauthorizedErroSchema },
+      },
+    },
+    403: {
+      description: "Forbidden",
+      content: {
+        "application/json": { schema: forbiddenErroSchema },
+      },
+    },
+    404: {
+      description: "Not Found",
+      content: {
+        "application/json": { schema: notFoundErroSchema },
+      },
+    },
+    422: {
+      description: "Erro na validação dos dados do params",
+      content: {
+        "application/json": {
+          schema: validationErroSchema,
+        },
+      },
+    },
+    500: {
+      description: "Erro interno do servidor",
+      content: {
+        "application/json": {
+          schema: servidorErroSchema,
+        },
+      },
+    },
+  },
+});
+
+// Encerrar Evento
+eventosRegistry.registerPath({
+  method: "patch",
+  path: "/{tenantSlug}/eventos/{eventoId}/encerrar",
+  tags: ["Eventos"],
+  summary: "Encerrar evento",
+  security: [{ bearerAuth: [] }],
+  request: {
+    params: DeletarEventoParamsRegister,
+  },
+  responses: {
+    200: {
+      description: "Evento encerrado",
       content: {
         "application/json": { schema: DeletarEventoResponseRegister },
       },
