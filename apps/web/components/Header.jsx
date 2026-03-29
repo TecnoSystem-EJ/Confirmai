@@ -6,7 +6,7 @@ export default function Header() {
     <header className="flex w-full items-center justify-between px-8 py-6">
       <div className="flex items-center gap-4">
         <Image
-          src="/ts.png" // Certifique-se de que a imagem está em apps/web/public/ts.png
+          src="/ts.png" 
           alt="Logo TecnoSystem"
           width={150}
           height={50}
