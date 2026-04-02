@@ -237,7 +237,7 @@ model usuarios {
   @@unique([tenantId, email])
 }
 
-<<<<<<< HEAD
+
 model inscricoes {
   id        String          @id @default(uuid())
   tenantId  String          @map("tenant_id")
@@ -253,10 +253,10 @@ model inscricoes {
   email_status String?      @default("pendente") // pendente | enviado | falhou
   checkin_realizado Boolean @default(false)
   checkin_data      DateTime?
-=======
+}
+
 model GlobalPaymentConfig {
   id String @id @default(uuid())
->>>>>>> 89586659d4240bba5d75aaffe05a207cecb13e4d
 
   // Configurações padrão da plataforma
   defaultPlatformFeePercent Decimal @default(10) @map("default_platform_fee_percent") @db.Decimal(5, 2)
