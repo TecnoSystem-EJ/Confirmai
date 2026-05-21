@@ -1,7 +1,8 @@
+// apps/web/components/ui/button.tsx
+
 import * as React from "react";
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  asChild?: boolean;
   variant?: "default" | "outline";
   size?: "sm" | "lg" | "default";
 }
@@ -11,7 +12,6 @@ export function Button({
   children,
   variant = "default",
   size = "default",
-  asChild,
   ...props
 }: ButtonProps) {
   const variants = {
@@ -24,16 +24,6 @@ export function Button({
     default: "px-4 py-2",
     lg: "px-6 py-3 text-lg",
   };
-
-  if (asChild) {
-    return (
-      <span
-        className={`inline-flex items-center justify-center rounded-md transition ${variants[variant]} ${sizes[size]} ${className}`}
-      >
-        {children}
-      </span>
-    );
-  }
 
   return (
     <button

@@ -17,7 +17,7 @@ export default function DashboardPage() {
           </p>
         </div>
 
-        {hasData ? (
+        {hasData ? ( 
           <></>
         ) : (
           <>
